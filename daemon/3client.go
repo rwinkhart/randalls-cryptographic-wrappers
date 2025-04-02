@@ -1,4 +1,4 @@
-package main
+package daemon
 
 import (
 	"log"
@@ -6,7 +6,8 @@ import (
 	"net/rpc"
 )
 
-func CallDaemon() string {
+// Call connects to the RPC server and requests the passphrase.
+func Call() string {
 	// connect to the UNIX domain socket
 	conn, err := net.Dial("unix", socketPath)
 	if err != nil {

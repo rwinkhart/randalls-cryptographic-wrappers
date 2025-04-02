@@ -1,4 +1,4 @@
-package main
+package daemon
 
 import (
 	"bytes"
@@ -19,8 +19,8 @@ var daemonHash []byte
 // RCWService provides an RPC method.
 type RCWService struct{}
 
-// StartDaemon should be called to start an RPC server.
-func StartDaemon() {
+// Run should be called to start an RPC server.
+func Run() {
 	// store the hash of the daemon binary
 	daemonHash = getFileHash(binPath)
 

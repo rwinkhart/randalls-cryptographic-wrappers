@@ -3,17 +3,18 @@ package main
 import (
 	"fmt"
 	"os"
+	"rcw/daemon"
 )
 
 func main() {
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
 		case "client":
-			fmt.Println("RPC Reply: " + CallDaemon())
+			fmt.Println("RPC Reply: " + daemon.Call())
 		default:
-			StartDaemon()
+			daemon.Run()
 		}
 	} else {
-		StartDaemon()
+		daemon.Run()
 	}
 }
