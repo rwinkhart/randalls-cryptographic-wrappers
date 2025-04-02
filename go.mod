@@ -1,0 +1,3 @@
+module rcw
+
+go 1.24.1
