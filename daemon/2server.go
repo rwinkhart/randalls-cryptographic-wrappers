@@ -75,7 +75,8 @@ func (h *RCWService) GetPass(request string, reply *string) error {
 // handleConn verifies the identity of the client.
 // It uses the file descriptor of the connection to get the PID of the client,
 // which is then used to get the path of the client's executable and calculate its hash.
-// The passphrase is only returned if the client's executable hash matches the daemon's hash.
+// The passphrase is only returned if the client's executable hash matches the daemon's hash
+// and if the request is coming from the same user.
 // This ensures that only the binary the daemon is embedded in can retrieve the passphrase.
 func handleConn(conn net.Conn) {
 	// ensure access to the underlying file descriptor
@@ -94,6 +95,7 @@ func handleConn(conn net.Conn) {
 	}
 
 	var callingPID int32
+	var callingUID int
 	_ = rawConn.Control(func(fd uintptr) {
 		// use syscall.GetsockoptUcred to fetch credentials
 		ucred, err := syscall.GetsockoptUcred(int(fd), syscall.SOL_SOCKET, syscall.SO_PEERCRED)
@@ -102,18 +104,19 @@ func handleConn(conn net.Conn) {
 			return
 		}
 		callingPID = ucred.Pid
+		callingUID = int(ucred.Uid)
 	})
 
-	// check if the RPC call is coming from an identical binary
+	// check if the RPC call is coming from an identical binary and from the same user
 	callingBinPath := pidToPath(callingPID)
-	if bytes.Equal(getFileHash(callingBinPath), daemonHash) {
+	if callingUID == os.Getuid() && bytes.Equal(getFileHash(callingBinPath), daemonHash) {
 		// valid client; hand off the connection to the RPC server
 		rpc.ServeConn(conn)
 	} else {
 		// invalid client; close the connection w/o a response,
 		// log the client's path, and kill the daemon
 		conn.Close()
-		log.Printf("Request received from invalid client: %s", callingBinPath) // TODO log to file
+		log.Printf("Request received from invalid client: PID(%d), UID(%d), Path(%s)", callingPID, callingUID, callingBinPath) // TODO log to file
 		os.Exit(2)
 	}
 }
