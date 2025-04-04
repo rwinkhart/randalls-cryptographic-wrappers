@@ -10,8 +10,10 @@ import (
 	"net"
 	"net/rpc"
 	"os"
-	"syscall"
+	"strconv"
 	"time"
+
+	peercred "github.com/rwinkhart/peercred-mini"
 )
 
 var daemonHash []byte
@@ -79,50 +81,24 @@ func (h *RCWService) GetPass(request string, reply *string) error {
 // and if the request is coming from the same user.
 // This ensures that only the binary the daemon is embedded in can retrieve the passphrase.
 func handleConn(conn net.Conn) {
-	// ensure access to the underlying file descriptor
-	unixConn, ok := conn.(*net.UnixConn)
-	if !ok {
-		log.Printf("Connection is not a Unix domain socket")
-		conn.Close()
-		return
-	}
-	// obtain SyscallConn for direct access to the file descriptor
-	rawConn, err := unixConn.SyscallConn()
-	if err != nil {
-		log.Printf("SyscallConn error: %v", err)
-		conn.Close()
-		return
-	}
-
-	var callingPID int32
-	var callingUID int
-	_ = rawConn.Control(func(fd uintptr) {
-		// use syscall.GetsockoptUcred to fetch credentials
-		ucred, err := syscall.GetsockoptUcred(int(fd), syscall.SOL_SOCKET, syscall.SO_PEERCRED)
-		if err != nil {
-			log.Printf("Error getting peer credentials: %v", err)
-			return
-		}
-		callingPID = ucred.Pid
-		callingUID = int(ucred.Uid)
-	})
+	ucred := peercred.Get(conn)
 
 	// check if the RPC call is coming from an identical binary and from the same user
-	callingBinPath := pidToPath(callingPID)
-	if callingUID == os.Getuid() && bytes.Equal(getFileHash(callingBinPath), daemonHash) {
+	callingBinPath := pidToPath(ucred.PID())
+	if ucred.UserID() == strconv.Itoa(os.Getuid()) && bytes.Equal(getFileHash(callingBinPath), daemonHash) {
 		// valid client; hand off the connection to the RPC server
 		rpc.ServeConn(conn)
 	} else {
 		// invalid client; close the connection w/o a response,
 		// log the client's path, and kill the daemon
 		conn.Close()
-		log.Printf("Request received from invalid client: PID(%d), UID(%d), Path(%s)", callingPID, callingUID, callingBinPath) // TODO log to file
+		log.Printf("Request received from invalid client: PID(%d), UID(%s), Path(%s)", ucred.PID(), ucred.UserID(), callingBinPath) // TODO log to file
 		os.Exit(2)
 	}
 }
 
 // pidToPath returns the path of the executable that has the given PID.
-func pidToPath(pid int32) string {
+func pidToPath(pid int) string {
 	path, _ := os.Readlink(fmt.Sprintf("/proc/%d/exe", pid))
 	return path
 }
