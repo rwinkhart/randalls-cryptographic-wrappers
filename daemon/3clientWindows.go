@@ -1,15 +1,18 @@
+//go:build windows
+
 package daemon
 
 import (
 	"log"
-	"net"
 	"net/rpc"
+
+	"github.com/Microsoft/go-winio"
 )
 
 // Call connects to the RPC server and requests the passphrase.
 func Call() string {
-	// connect to the UNIX domain socket
-	conn, err := net.Dial("unix", socketPath)
+	// connect to the Windows named pipe
+	conn, err := winio.DialPipe(socketPath, nil)
 	if err != nil {
 		log.Fatalf("Dial error: %v", err)
 	}
