@@ -83,15 +83,15 @@ func handleConn(conn net.Conn) {
 	ucred := peercred.Get(conn)
 
 	// check if the RPC call is coming from an identical binary and from the same user
-	callingBinPath := pidToPath(ucred.PID())
-	if ucred.UserID() == strconv.Itoa(os.Getuid()) && bytes.Equal(getFileHash(callingBinPath), daemonHash) {
+	callingBinPath := pidToPath(ucred.PID)
+	if ucred.UID == strconv.Itoa(os.Getuid()) && bytes.Equal(getFileHash(callingBinPath), daemonHash) {
 		// valid client; hand off the connection to the RPC server
 		rpc.ServeConn(conn)
 	} else {
 		// invalid client; close the connection w/o a response,
 		// log the client's path, and kill the daemon
 		conn.Close()
-		log.Printf("Request received from invalid client: PID(%d), UID(%s), Path(%s)", ucred.PID(), ucred.UserID(), callingBinPath) // TODO log to file
+		log.Printf("Request received from invalid client: PID(%d), UID(%s), Path(%s)", ucred.PID, ucred.UID, callingBinPath) // TODO log to file
 		os.Exit(2)
 	}
 }

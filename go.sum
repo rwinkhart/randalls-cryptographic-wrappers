@@ -1,4 +1,4 @@
-github.com/rwinkhart/peercred-mini v0.0.0-20250405012931-0e071fcd683d h1:Uio9uhJuKLp8+c/C3TUrsC9Vd93hBK5oRcm2+o8+DvI=
-github.com/rwinkhart/peercred-mini v0.0.0-20250405012931-0e071fcd683d/go.mod h1:cH3916WNofkve4MeeK56H0whuUUVf57iYht3nsUyEh8=
+github.com/rwinkhart/peercred-mini v0.0.0-20250405191724-d116525c2b41 h1:wUMbTEwPIf6bqLCAUmJ58uuYu6OX0iGa6S6NjYUXGPA=
+github.com/rwinkhart/peercred-mini v0.0.0-20250405191724-d116525c2b41/go.mod h1:cH3916WNofkve4MeeK56H0whuUUVf57iYht3nsUyEh8=
 github.com/rwinkhart/sys-freebsd-13-xucred v0.0.0-20250405011819-d304d362d032 h1:4qzc09ysQhkyI2oN7pLbZMQP+qHq2TlVRCkMSmbl8m8=
 github.com/rwinkhart/sys-freebsd-13-xucred v0.0.0-20250405011819-d304d362d032/go.mod h1:U89aT1yaUAbs+9Dp9i1lZ2+5GsRNYk0l42+d1wykDBA=
