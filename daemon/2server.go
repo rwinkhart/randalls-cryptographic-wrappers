@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"errors"
-	"fmt"
 	"io"
 	"log"
 	"net"
@@ -95,12 +94,6 @@ func handleConn(conn net.Conn) {
 		log.Printf("Request received from invalid client: PID(%d), UID(%s), Path(%s)", ucred.PID(), ucred.UserID(), callingBinPath) // TODO log to file
 		os.Exit(2)
 	}
-}
-
-// pidToPath returns the path of the executable that has the given PID.
-func pidToPath(pid int) string {
-	path, _ := os.Readlink(fmt.Sprintf("/proc/%d/"+pidPathFile, pid))
-	return path
 }
 
 // getFileHash returns the SHA256 hash of the file at the given path.
