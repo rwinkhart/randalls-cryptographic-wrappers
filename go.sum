@@ -1,6 +1,6 @@
 github.com/Microsoft/go-winio v0.6.2 h1:F2VQgta7ecxGYO8k3ZZz3RS8fVIXVxONVUPlNERoyfY=
 github.com/Microsoft/go-winio v0.6.2/go.mod h1:yd8OoFMLzJbo9gZq8j5qaps8bJ9aShtEA8Ipt1oGCvU=
-github.com/rwinkhart/peercred-mini v0.0.0-20250405214620-93ccab17290b h1:AEeo+zR+ZupGNvUwvu0YZcIX2X2sN1/S5Qw0nPyns3k=
-github.com/rwinkhart/peercred-mini v0.0.0-20250405214620-93ccab17290b/go.mod h1:JNvJiNItSyk3JXfeDvdt1sPmY5NHqj7TJ2faTobtQHA=
+github.com/rwinkhart/peercred-mini v0.0.0-20250407024456-ffe191394a3a h1:c0b2SXOaaDnfnWFH33mthkAJWzadwN6bDU0d7xp1lO0=
+github.com/rwinkhart/peercred-mini v0.0.0-20250407024456-ffe191394a3a/go.mod h1:g1QgFJec8tuq5BAZ4bpPQggS0VcjaqnGu8pPls6eufE=
 github.com/rwinkhart/sys-freebsd-13-xucred v0.0.0-20250405010723-99a5f0732c0e h1:YRpZcbGU/LVLwK87IURH4Sfye6Fv0ri1IRZ27loWpHs=
 github.com/rwinkhart/sys-freebsd-13-xucred v0.0.0-20250405010723-99a5f0732c0e/go.mod h1:BJP2sWEmIv4KK5OTEluFJCKSidICx8ciO85XgH3Ak8k=

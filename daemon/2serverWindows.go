@@ -3,12 +3,15 @@
 package daemon
 
 import (
+	"bytes"
 	"log"
 	"net"
 	"net/rpc"
 	"os"
 
 	"github.com/Microsoft/go-winio" // For Windows named pipes
+	"github.com/rwinkhart/peercred-mini"
+	"golang.org/x/sys/windows"
 )
 
 const (
@@ -63,7 +66,24 @@ func Run() {
 
 // handleConn verifies the identity of the client.
 // It gets the PID of the client process and verifies it's running the same binary
-// TODO ADD AUTHENTICATION
 func handleConn(conn net.Conn) {
-	rpc.ServeConn(conn)
+	ucred := peercred.Get(conn)
+
+	// get server SID (UID)
+	var token windows.Token
+	windows.OpenProcessToken(windows.CurrentProcess(), windows.TOKEN_QUERY, &token)
+	defer token.Close()
+	user, _ := token.GetTokenUser()
+
+	// check if the RPC call is coming from an identical binary and from the same user
+	callingBinPath := pidToPath(uint32(ucred.PID))
+	if ucred.UID == user.User.Sid.String() && bytes.Equal(getFileHash(callingBinPath), daemonHash) {
+		rpc.ServeConn(conn)
+	} else {
+		// invalid client; close the connection w/o a response,
+		// log the client's path, and kill the daemon
+		conn.Close()
+		log.Printf("Request received from invalid client: PID(%d), UID(%s), Path(%s)", ucred.PID, ucred.UID, callingBinPath) // TODO log to file
+		os.Exit(2)
+	}
 }
