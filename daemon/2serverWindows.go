@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/rpc"
 	"os"
+	"time"
 
 	"github.com/Microsoft/go-winio" // For Windows named pipes
 	"github.com/rwinkhart/peercred-mini"
@@ -44,20 +45,31 @@ func Run() {
 	defer listener.Close()
 	log.Printf("RPC daemon listening on %s", socketPath)
 
-	// accept connections (timeout after 3 minutes of inactivity)
-	for {
-		// set deadline for accepting new connections
-		//listener.SetDeadline(time.Now().Add(3 * time.Minute)) TODO FIX
+	// create 3-minute inactivity timer
+	timer := time.NewTimer(3 * time.Minute)
+	killTimer := make(chan struct{})
+	go func() {
+		select {
+		case <-timer.C:
+			log.Println("Three minutes have passed without any connections. Exiting...")
+			listener.Close()
+			os.Exit(0)
+		case <-killTimer:
+			return
+		}
+	}()
 
+	// accept connections
+	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			if os.IsTimeout(err) {
-				log.Println("Three minutes have passed without any connections. Exiting...")
-				os.Exit(0)
-			}
 			log.Printf("Accept error: %v", err)
+			close(killTimer)
 			continue
 		}
+
+		// reset timer after connection is accepted
+		timer.Reset(3 * time.Minute)
 
 		// use a goroutine to check the client's identity
 		go handleConn(conn)

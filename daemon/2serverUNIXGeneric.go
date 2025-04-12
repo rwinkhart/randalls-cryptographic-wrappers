@@ -47,6 +47,7 @@ func Run() {
 		if err != nil {
 			if err.(net.Error).Timeout() {
 				log.Println("Three minutes have passed without any connections. Exiting...")
+				listener.Close()
 				os.Exit(0)
 			}
 			log.Printf("Accept error: %v", err)
