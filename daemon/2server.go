@@ -26,3 +26,13 @@ func getFileHash(path string) []byte {
 	io.Copy(hash, file)
 	return hash.Sum(nil)
 }
+
+// daemonIsOpen checks if the socket/named pipe for the rcw
+// daemon exists and returns a boolean indicator.
+func daemonIsOpen() bool {
+	fileInfo, err := os.Stat(socketPath)
+	if err != nil {
+		return false
+	}
+	return !fileInfo.IsDir()
+}
