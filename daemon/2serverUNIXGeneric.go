@@ -15,7 +15,15 @@ import (
 )
 
 // Run should be called to start an RPC server.
-func Run() {
+func Start(inputPassphrase string) {
+	// ensure daemon is not already running
+	if daemonIsOpen() {
+		return
+	}
+
+	// store passphrase to be referenced by GetPass method
+	passphrase = inputPassphrase
+
 	// register RCWService with the RPC package
 	if err := rpc.Register(&RCWService{}); err != nil {
 		log.Fatalf("Error registering RPC service: %v", err)

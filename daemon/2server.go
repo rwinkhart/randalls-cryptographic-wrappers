@@ -2,12 +2,12 @@ package daemon
 
 import (
 	"crypto/sha256"
-	"errors"
 	"io"
 	"os"
 )
 
 var daemonHash []byte
+var passphrase string
 
 // RCWService provides an RPC method.
 type RCWService struct{}
@@ -15,11 +15,8 @@ type RCWService struct{}
 // GetPass is the RPC method.
 // For now (as a test/example), it returns "hello" if the input is "hi".
 func (h *RCWService) GetPass(request string, reply *string) error {
-	if request == "hi" {
-		*reply = "hello"
-		return nil
-	}
-	return errors.New("unexpected input, expected \"hi\"")
+	*reply = passphrase
+	return nil
 }
 
 // getFileHash returns the SHA256 hash of the file at the given path.
