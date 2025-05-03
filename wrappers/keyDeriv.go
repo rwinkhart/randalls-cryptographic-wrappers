@@ -5,13 +5,15 @@ import (
 	"golang.org/x/crypto/chacha20poly1305"
 )
 
-// parameters for Argon2
 const (
+	// parameters for Argon2
 	argonTime    = 1
 	argonMemory  = 64 * 1024
 	argonThreads = 4
 	argonKeyLen  = chacha20poly1305.KeySize
-	saltSize     = 16
+
+	// general constants
+	saltSize = 16
 )
 
 // DeriveKey derives an encryption key from a passphrase using Argon2.
