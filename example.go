@@ -28,6 +28,10 @@ import (
 //     Store:
 //         Hash of passphrase (prevent user from losing data by accidentally providing incorrect passphrase during encryption)
 // 		   Order of algorithms (determined randomly at keyfile generation)
+// Security:
+// 	   Play with nonce sizes and Argon2 parameters to find the best speed-security balance
+// Standalone cmd:
+//     Usable as symmetric-only GPG replacement
 
 func main() {
 	switch len(os.Args) {
@@ -37,8 +41,16 @@ func main() {
 	case 3:
 		// decrypt file
 		encBytes, _ := os.ReadFile("encrypted-example.txt")
-		decBytes := wrappers.DecryptCha(encBytes, []byte(os.Args[2]))
-		decBytes = wrappers.DecryptAES(decBytes, []byte(os.Args[2]))
+		decBytes, err := wrappers.DecryptCha(encBytes, []byte(os.Args[2]))
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		decBytes, err = wrappers.DecryptAES(decBytes, []byte(os.Args[2]))
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 		fmt.Println(string(decBytes))
 	case 4:
 		// encrypt data (from cli args)

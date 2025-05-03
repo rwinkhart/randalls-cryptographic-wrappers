@@ -4,7 +4,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"fmt"
+	"errors"
 	"io"
 )
 
@@ -12,7 +12,7 @@ const (
 	nonceSizeAES = 12 // GCM standard nonce size is 12 bytes
 )
 
-// EncryptAES encrypts data using AES-256-GCM
+// EncryptAES encrypts data using AES-256-GCM.
 func EncryptAES(data []byte, passphrase []byte) []byte {
 	// generate a random salt
 	salt := make([]byte, saltSize)
@@ -43,11 +43,10 @@ func EncryptAES(data []byte, passphrase []byte) []byte {
 	return result
 }
 
-// DecryptAES decrypts data using AES-256-GCM
-func DecryptAES(encryptedData []byte, passphrase []byte) []byte {
+// DecryptAES decrypts data using AES256-GCM.
+func DecryptAES(encryptedData []byte, passphrase []byte) ([]byte, error) {
 	if len(encryptedData) < saltSize+nonceSizeAES {
-		fmt.Println("Encrypted data is too short")
-		return nil
+		return nil, errors.New("AES256-GCM: Encrypted data is too short")
 	}
 
 	// extract salt, nonce, and ciphertext
@@ -67,9 +66,8 @@ func DecryptAES(encryptedData []byte, passphrase []byte) []byte {
 	// decrypt the data
 	plaintext, err := aesGCM.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
-		fmt.Printf("Decryption failed (possibly wrong passphrase): %s", err.Error())
-		return nil
+		return nil, err
 	}
 
-	return plaintext
+	return plaintext, nil
 }
