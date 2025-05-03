@@ -10,13 +10,12 @@ import (
 
 const (
 	nonceSizeCha = chacha20poly1305.NonceSizeX
-	saltSizeCha  = 16
 )
 
 // EncryptCha encrypts data using ChaCha20-Poly1305
 func EncryptCha(data []byte, passphrase []byte) []byte {
 	// generate a random salt
-	salt := make([]byte, saltSizeCha)
+	salt := make([]byte, saltSize)
 	io.ReadFull(rand.Reader, salt)
 
 	// derive key from passphrase using the salt
@@ -24,17 +23,17 @@ func EncryptCha(data []byte, passphrase []byte) []byte {
 	key := deriveKey(passphrase, salt)
 
 	// create ChaCha20-Poly1305 cipher
-	aead, _ := chacha20poly1305.NewX(key)
+	stream, _ := chacha20poly1305.NewX(key)
 
 	// generate a random nonce
 	nonce := make([]byte, nonceSizeCha)
 	io.ReadFull(rand.Reader, nonce)
 
 	// encrypt the data
-	ciphertext := aead.Seal(nil, nonce, data, nil)
+	ciphertext := stream.Seal(nil, nonce, data, nil)
 
 	// format: salt + nonce + ciphertext
-	result := make([]byte, 0, saltSizeCha+nonceSizeCha+len(ciphertext))
+	result := make([]byte, 0, saltSize+nonceSizeCha+len(ciphertext))
 	result = append(result, salt...)
 	result = append(result, nonce...)
 	result = append(result, ciphertext...)
@@ -44,24 +43,24 @@ func EncryptCha(data []byte, passphrase []byte) []byte {
 
 // DecryptCha decrypts data using ChaCha20-Poly1305
 func DecryptCha(encryptedData []byte, passphrase []byte) []byte {
-	if len(encryptedData) < saltSizeCha+nonceSizeCha {
+	if len(encryptedData) < saltSize+nonceSizeCha {
 		fmt.Println("Encrypted data is too short")
 		return nil
 	}
 
 	// extract salt, nonce, and ciphertext
-	salt := encryptedData[:saltSizeCha]
-	nonce := encryptedData[saltSizeCha : saltSizeCha+nonceSizeCha]
-	ciphertext := encryptedData[saltSizeCha+nonceSizeCha:]
+	salt := encryptedData[:saltSize]
+	nonce := encryptedData[saltSize : saltSize+nonceSizeCha]
+	ciphertext := encryptedData[saltSize+nonceSizeCha:]
 
 	// derive key from passphrase using the salt
 	key := deriveKey(passphrase, salt)
 
 	// create ChaCha20-Poly1305 cipher
-	aead, _ := chacha20poly1305.NewX(key)
+	stream, _ := chacha20poly1305.NewX(key)
 
 	// decrypt the data
-	plaintext, err := aead.Open(nil, nonce, ciphertext, nil)
+	plaintext, err := stream.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
 		fmt.Printf("Decryption failed (possibly wrong passphrase): %s", err.Error())
 		return nil
