@@ -14,7 +14,7 @@ import (
 // rcw <text> : Runs the rcw daemon to serve the provided text for three minutes
 // rcw : Requests the data served by the RCW daemon and outputs it to stdout
 // rcw enc <text> <passwd> : Encrypts the provided text and outputs the ciphertext to encrypted-example.txt
-// rcw dec <passwd> : Decrypts the provided file and outputs the plaintext to stdout
+// rcw dec <passwd> : Decrypts encrypted-example.txt and outputs the plaintext to stdout
 
 // TODO Tests:
 // Salt (aes+chacha)
