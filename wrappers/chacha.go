@@ -2,8 +2,8 @@ package wrappers
 
 import (
 	"crypto/rand"
+	"fmt"
 	"io"
-	"log"
 
 	"golang.org/x/crypto/chacha20poly1305"
 )
@@ -45,7 +45,7 @@ func EncryptCha(data []byte, passphrase []byte) []byte {
 // DecryptCha decrypts data using ChaCha20-Poly1305
 func DecryptCha(encryptedData []byte, passphrase []byte) []byte {
 	if len(encryptedData) < saltSizeCha+nonceSizeCha {
-		log.Fatalf("encrypted data is too short")
+		fmt.Println("Encrypted data is too short")
 		return nil
 	}
 
@@ -63,7 +63,7 @@ func DecryptCha(encryptedData []byte, passphrase []byte) []byte {
 	// decrypt the data
 	plaintext, err := aead.Open(nil, nonce, ciphertext, nil)
 	if err != nil {
-		log.Fatalf("decryption failed (possibly wrong passphrase): %w", err)
+		fmt.Printf("Decryption failed (possibly wrong passphrase): %s", err.Error())
 		return nil
 	}
 
