@@ -13,7 +13,7 @@ const (
 )
 
 // EncryptAES encrypts data using AES-256-GCM.
-func EncryptAES(data []byte, passphrase []byte) []byte {
+func encryptAES(decBytes []byte, passphrase []byte) []byte {
 	// generate a random salt
 	salt := make([]byte, saltSize)
 	io.ReadFull(rand.Reader, salt)
@@ -32,7 +32,7 @@ func EncryptAES(data []byte, passphrase []byte) []byte {
 	io.ReadFull(rand.Reader, nonce)
 
 	// encrypt the data
-	ciphertext := aesGCM.Seal(nil, nonce, data, nil)
+	ciphertext := aesGCM.Seal(nil, nonce, decBytes, nil)
 
 	// format: salt + nonce + ciphertext
 	result := make([]byte, 0, saltSize+nonceSizeAES+len(ciphertext))
@@ -44,15 +44,15 @@ func EncryptAES(data []byte, passphrase []byte) []byte {
 }
 
 // DecryptAES decrypts data using AES256-GCM.
-func DecryptAES(encryptedData []byte, passphrase []byte) ([]byte, error) {
-	if len(encryptedData) < saltSize+nonceSizeAES {
+func decryptAES(encBytes []byte, passphrase []byte) ([]byte, error) {
+	if len(encBytes) < saltSize+nonceSizeAES {
 		return nil, errors.New("AES256-GCM: Encrypted data is too short")
 	}
 
 	// extract salt, nonce, and ciphertext
-	salt := encryptedData[:saltSize]
-	nonce := encryptedData[saltSize : saltSize+nonceSizeAES]
-	ciphertext := encryptedData[saltSize+nonceSizeAES:]
+	salt := encBytes[:saltSize]
+	nonce := encBytes[saltSize : saltSize+nonceSizeAES]
+	ciphertext := encBytes[saltSize+nonceSizeAES:]
 
 	// derive key from passphrase using the salt
 	key := deriveKey(passphrase, salt)

@@ -24,10 +24,6 @@ import (
 // RPC password sharing
 
 // TODO Enhancements:
-// Keyfile:
-//     Store:
-//         Hash of passphrase (prevent user from losing data by accidentally providing incorrect passphrase during encryption)
-// 		   Order of algorithms (determined randomly at keyfile generation)
 // Security:
 // 	   Play with nonce sizes and Argon2 parameters to find the best speed-security balance
 // Standalone cmd:
@@ -41,12 +37,7 @@ func main() {
 	case 3:
 		// decrypt file
 		encBytes, _ := os.ReadFile("encrypted-example.txt")
-		decBytes, err := wrappers.DecryptCha(encBytes, []byte(os.Args[2]))
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-		decBytes, err = wrappers.DecryptAES(decBytes, []byte(os.Args[2]))
+		decBytes, err := wrappers.Decrypt(encBytes, []byte(os.Args[2]))
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -54,8 +45,7 @@ func main() {
 		fmt.Println(string(decBytes))
 	case 4:
 		// encrypt data (from cli args)
-		encBytes := wrappers.EncryptAES([]byte(os.Args[2]), []byte(os.Args[3]))
-		encBytes = wrappers.EncryptCha(encBytes, []byte(os.Args[3]))
+		encBytes := wrappers.Encrypt([]byte(os.Args[2]), []byte(os.Args[3]))
 		os.WriteFile("encrypted-example.txt", encBytes, 0644)
 	default:
 		// request served data

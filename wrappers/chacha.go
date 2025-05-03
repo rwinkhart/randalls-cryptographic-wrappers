@@ -13,13 +13,12 @@ const (
 )
 
 // EncryptCha encrypts data using ChaCha20-Poly1305.
-func EncryptCha(data []byte, passphrase []byte) []byte {
+func encryptCha(data []byte, passphrase []byte) []byte {
 	// generate a random salt
 	salt := make([]byte, saltSize)
 	io.ReadFull(rand.Reader, salt)
 
 	// derive key from passphrase using the salt
-	// TODO ensure the passphrase is consistent (store a hashed version to compare against)
 	key := deriveKey(passphrase, salt)
 
 	// create ChaCha20-Poly1305 cipher
@@ -42,7 +41,7 @@ func EncryptCha(data []byte, passphrase []byte) []byte {
 }
 
 // DecryptCha decrypts data using ChaCha20-Poly1305.
-func DecryptCha(encryptedData []byte, passphrase []byte) ([]byte, error) {
+func decryptCha(encryptedData []byte, passphrase []byte) ([]byte, error) {
 	if len(encryptedData) < saltSize+nonceSizeCha {
 		return nil, errors.New("ChaCha20-Poly1305: Encrypted data is too short")
 	}
