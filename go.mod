@@ -6,6 +6,7 @@ require github.com/rwinkhart/peercred-mini v0.0.0-20250407033241-c09add2eceea
 
 require (
 	github.com/Microsoft/go-winio v0.6.2
+	golang.org/x/crypto v0.37.0
 	golang.org/x/sys v0.32.0
 )
 

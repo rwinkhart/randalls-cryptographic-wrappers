@@ -4,3 +4,5 @@ github.com/rwinkhart/peercred-mini v0.0.0-20250407033241-c09add2eceea h1:VE2ti/A
 github.com/rwinkhart/peercred-mini v0.0.0-20250407033241-c09add2eceea/go.mod h1:t+YkvAdnTKTrg4d469tw3K+GCUzX/Bja4h8yKjSIsGs=
 github.com/rwinkhart/sys-freebsd-13-xucred v0.32.0 h1:KRbqimv9Eexf3VB2FrRAQ4v2fGGu7gt3ayMgdT0FNao=
 github.com/rwinkhart/sys-freebsd-13-xucred v0.32.0/go.mod h1:BJP2sWEmIv4KK5OTEluFJCKSidICx8ciO85XgH3Ak8k=
+golang.org/x/crypto v0.37.0 h1:kJNSjF/Xp7kU0iB2Z+9viTPMW4EqqsrywMXLJOOsXSE=
+golang.org/x/crypto v0.37.0/go.mod h1:vg+k43peMZ0pUMhYmVAWysMK35e6ioLh3wB8ZCAfbVc=
