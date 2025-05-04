@@ -1,4 +1,4 @@
-module rcw
+module github.com/rwinkhart/rcw
 
 go 1.24.2
 

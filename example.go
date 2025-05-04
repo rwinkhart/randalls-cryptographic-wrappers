@@ -3,8 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
-	"rcw/daemon"
-	"rcw/wrappers"
+
+	"github.com/rwinkhart/rcw/daemon"
+	"github.com/rwinkhart/rcw/wrappers"
 )
 
 // This sample program serves purley as a way to interactively test the features
