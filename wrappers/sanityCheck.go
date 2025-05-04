@@ -8,8 +8,9 @@ import (
 // GenSanityCheck creates an encrypted file containing known plaintext
 // to later be used for ensuring the user does not encrypt data with
 // an incorrect passphrase.
-func GenSanityCheck(path string, passphrase []byte) {
-	os.WriteFile(path, Encrypt([]byte("thx4usin'rcw"), passphrase), 0600)
+func GenSanityCheck(path string, passphrase []byte) error {
+	err := os.WriteFile(path, Encrypt([]byte("thx4usin'rcw"), passphrase), 0600)
+	return err
 }
 
 // RunSanityCheck should be run before any encryption operation

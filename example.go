@@ -11,6 +11,7 @@ import (
 // of RCW before building it into your own application.
 //
 // Usage:
+// rcw init <passwd> : Generates the required sanity check file
 // rcw <text> : Runs the rcw daemon to serve the provided text for three minutes
 // rcw : Requests the data served by the RCW daemon and outputs it to stdout
 // rcw enc <text> <passwd> : Encrypts the provided text and outputs the ciphertext to encrypted-example.txt
@@ -35,8 +36,17 @@ func main() {
 		// serve data
 		daemon.Start(os.Args[1])
 	case 3:
+		if os.Args[1] == "init" {
+			// create sanity check file
+			err := wrappers.GenSanityCheck("ex-sanity.rcw", []byte(os.Args[2]))
+			if err != nil {
+				fmt.Println(err)
+			}
+			return
+		}
+
 		// decrypt file
-		encBytes, _ := os.ReadFile("encrypted-example.txt")
+		encBytes, _ := os.ReadFile("ex-cipher.rcw")
 		decBytes, err := wrappers.Decrypt(encBytes, []byte(os.Args[2]))
 		if err != nil {
 			fmt.Println(err)
@@ -45,8 +55,13 @@ func main() {
 		fmt.Println(string(decBytes))
 	case 4:
 		// encrypt data (from cli args)
+		err := wrappers.RunSanityCheck("ex-sanity.rcw", []byte(os.Args[3]))
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 		encBytes := wrappers.Encrypt([]byte(os.Args[2]), []byte(os.Args[3]))
-		os.WriteFile("encrypted-example.txt", encBytes, 0644)
+		os.WriteFile("ex-cipher.rcw", encBytes, 0600)
 	default:
 		// request served data
 		fmt.Println(daemon.Call())
