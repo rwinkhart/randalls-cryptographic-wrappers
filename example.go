@@ -30,6 +30,11 @@ import (
 // Standalone cmd:
 //     Usable as symmetric-only GPG replacement
 
+const (
+	outputFile = "ex-cipher.rcw"
+	sanityFile = "ex-sanity.rcw"
+)
+
 func main() {
 	switch len(os.Args) {
 	case 2:
@@ -38,7 +43,7 @@ func main() {
 	case 3:
 		if os.Args[1] == "init" {
 			// create sanity check file
-			err := wrappers.GenSanityCheck("ex-sanity.rcw", []byte(os.Args[2]))
+			err := wrappers.GenSanityCheck(sanityFile, []byte(os.Args[2]))
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -46,7 +51,7 @@ func main() {
 		}
 
 		// decrypt file
-		encBytes, _ := os.ReadFile("ex-cipher.rcw")
+		encBytes, _ := os.ReadFile(outputFile)
 		decBytes, err := wrappers.Decrypt(encBytes, []byte(os.Args[2]))
 		if err != nil {
 			fmt.Println(err)
@@ -55,13 +60,13 @@ func main() {
 		fmt.Println(string(decBytes))
 	case 4:
 		// encrypt data (from cli args)
-		err := wrappers.RunSanityCheck("ex-sanity.rcw", []byte(os.Args[3]))
+		err := wrappers.RunSanityCheck(sanityFile, []byte(os.Args[3]))
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 		encBytes := wrappers.Encrypt([]byte(os.Args[2]), []byte(os.Args[3]))
-		os.WriteFile("ex-cipher.rcw", encBytes, 0600)
+		os.WriteFile(outputFile, encBytes, 0600)
 	default:
 		// request served data
 		fmt.Println(daemon.Call())
