@@ -70,6 +70,10 @@ func main() {
 		os.WriteFile(outputFile, encBytes, 0600)
 	default:
 		// request served data
-		fmt.Println(daemon.Call())
+		if servedData := daemon.CallDaemonIfOpen(); servedData != nil {
+			fmt.Println(string(servedData))
+		} else {
+			fmt.Println("No RCW daemon available")
+		}
 	}
 }

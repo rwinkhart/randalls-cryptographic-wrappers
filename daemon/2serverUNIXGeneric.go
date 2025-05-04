@@ -14,15 +14,10 @@ import (
 	peercred "github.com/rwinkhart/peercred-mini"
 )
 
-// Run should be called to start an RPC server.
-func Start(inputPassphrase string) {
-	// ensure daemon is not already running
-	if daemonIsOpen() {
-		return
-	}
-
+// Start should be called to serve the given passphrase through an RPC daemon.
+func Start(passphrase string) {
 	// store passphrase to be referenced by GetPass method
-	passphrase = inputPassphrase
+	globalPassphrase = passphrase
 
 	// register RCWService with the RPC package
 	if err := rpc.Register(&RCWService{}); err != nil {
@@ -31,13 +26,6 @@ func Start(inputPassphrase string) {
 
 	// store the hash of the daemon binary
 	daemonHash = getFileHash(binPath)
-
-	// remove the socket file if it already exists
-	if _, err := os.Stat(socketPath); err == nil {
-		if err := os.Remove(socketPath); err != nil {
-			log.Fatalf("Failed to remove existing socket: %v", err)
-		}
-	}
 
 	// listen on the Unix domain socket
 	listener, err := net.Listen("unix", socketPath)

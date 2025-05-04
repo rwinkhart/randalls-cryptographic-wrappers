@@ -19,15 +19,10 @@ const (
 	PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
 )
 
-// Run should be called to start an RPC server using Windows named pipes
-func Start(inputPassphrase string) {
-	// ensure daemon is not already running
-	if daemonIsOpen() {
-		return
-	}
-
+// Start should be called to serve the given passphrase through an RPC daemon.
+func Start(passphrase string) {
 	// store passphrase to be referenced by GetPass method
-	passphrase = inputPassphrase
+	globalPassphrase = passphrase
 
 	// register RCWService with the RPC package
 	if err := rpc.Register(&RCWService{}); err != nil {

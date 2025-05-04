@@ -5,8 +5,18 @@ import (
 	"net/rpc"
 )
 
-// Call connects to the RPC server and requests the passphrase.
-func Call() string {
+// CallDaemonIfOpen returns the passphrase served by the RCW daemon
+// (if one is available). If no RCW daemon is accessible, nil is returned.
+func CallDaemonIfOpen() []byte {
+	if daemonIsOpen() {
+		call()
+		return call()
+	}
+	return nil
+}
+
+// call connects to the RPC server and requests the passphrase.
+func call() []byte {
 	// connect to the UNIX domain socket/Windows named pipe
 	conn := getConn()
 	defer conn.Close()
@@ -22,5 +32,5 @@ func Call() string {
 	}
 
 	// return the passphrase
-	return reply
+	return []byte(reply)
 }

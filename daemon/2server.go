@@ -7,7 +7,7 @@ import (
 )
 
 var daemonHash []byte
-var passphrase string
+var globalPassphrase string
 
 // RCWService provides an RPC method.
 type RCWService struct{}
@@ -15,7 +15,7 @@ type RCWService struct{}
 // GetPass is the RPC method.
 // For now (as a test/example), it returns "hello" if the input is "hi".
 func (h *RCWService) GetPass(request string, reply *string) error {
-	*reply = passphrase
+	*reply = globalPassphrase
 	return nil
 }
 
@@ -25,14 +25,4 @@ func getFileHash(path string) []byte {
 	hash := sha256.New()
 	io.Copy(hash, file)
 	return hash.Sum(nil)
-}
-
-// daemonIsOpen checks if the socket/named pipe for the rcw
-// daemon exists and returns a boolean indicator.
-func daemonIsOpen() bool {
-	fileInfo, err := os.Stat(socketPath)
-	if err != nil {
-		return false
-	}
-	return !fileInfo.IsDir()
 }
