@@ -8,6 +8,8 @@ import (
 	"net"
 	"net/rpc"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/Microsoft/go-winio" // For Windows named pipes
@@ -48,6 +50,9 @@ func Start(passphrase string) {
 	defer listener.Close()
 	log.Printf("RPC daemon listening on %s", socketPath)
 
+	// capture sigterms to ensure listener is closed
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	// create 3-minute inactivity timer
 	timer := time.NewTimer(3 * time.Minute)
 	killTimer := make(chan struct{})
@@ -59,6 +64,9 @@ func Start(passphrase string) {
 			os.Exit(0)
 		case <-killTimer:
 			return
+		case <-sigChan:
+			listener.Close()
+			os.Exit(0)
 		}
 	}()
 

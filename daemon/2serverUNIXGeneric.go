@@ -8,7 +8,9 @@ import (
 	"net"
 	"net/rpc"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 	"time"
 
 	peercred "github.com/rwinkhart/peercred-mini"
@@ -34,6 +36,15 @@ func Start(passphrase string) {
 	}
 	defer listener.Close()
 	log.Printf("RPC daemon listening on unix://%s", socketPath)
+
+	// capture sigterms to ensure listener is closed
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sigChan
+		listener.Close()
+		os.Exit(0)
+	}()
 
 	// accept connections (timeout after 3 minutes of inactivity)
 	for {
