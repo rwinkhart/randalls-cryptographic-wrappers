@@ -4,14 +4,13 @@ import (
 	"runtime"
 
 	"golang.org/x/crypto/argon2"
-	"golang.org/x/crypto/chacha20poly1305"
 )
 
 const (
 	// parameters for Argon2
-	argonTime   = 1
-	argonMemory = 64 * 1024
-	argonKeyLen = chacha20poly1305.KeySize
+	argonTime   = 8          // set to pass 1-second test in dev environment
+	argonMemory = 384 * 1024 // 384 MB
+	argonKeyLen = 32         // 256 bits, key length for both ChaCha20 and AES256
 
 	// general constants
 	saltSize = 16
