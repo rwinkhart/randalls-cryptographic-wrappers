@@ -62,11 +62,11 @@ func main() {
 				fmt.Println(err)
 				return
 			}
-			decBytes := daemon.DecryptWithDaemonIfOpen(encBytes)
-			if decBytes == nil {
-				fmt.Println("No RCW daemon available")
-				passphrase := inputHidden("Enter RCW passphrase:")
-				decBytes, err = wrappers.Decrypt(encBytes, passphrase)
+			var decBytes []byte
+			if daemon.IsOpen() {
+				decBytes = daemon.GetDec(encBytes)
+			} else {
+				decBytes, err = wrappers.Decrypt(encBytes, inputHidden("Enter RCW passphrase:"))
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -100,11 +100,11 @@ func main() {
 			// encrypt data (using daemon if available)
 			// rcw enc <data>
 			decBytes := []byte(os.Args[2])
-			encBytes := daemon.EncryptWithDaemonIfOpen(decBytes)
-			if encBytes == nil {
-				fmt.Println("No RCW daemon available")
-				passphrase := inputHidden("Enter RCW passphrase:")
-				encBytes = wrappers.Encrypt(decBytes, passphrase)
+			var encBytes []byte
+			if daemon.IsOpen() {
+				encBytes = daemon.GetEnc(decBytes)
+			} else {
+				encBytes = wrappers.Encrypt(decBytes, inputHidden("Enter RCW passphrase:"))
 			}
 			os.WriteFile(outputFile, encBytes, 0600)
 			return

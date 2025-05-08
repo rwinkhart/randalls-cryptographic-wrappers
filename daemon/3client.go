@@ -6,27 +6,9 @@ import (
 	"net/rpc"
 )
 
-// DecryptWithDaemonIfOpen uses the RCW daemon (if one is available) to
-// decrypt and return data. If no RCW daemon is accessible, nil is returned.
-func DecryptWithDaemonIfOpen(encBytes []byte) []byte {
-	if IsOpen() {
-		return getDecFromDaemon(encBytes)
-	}
-	return nil
-}
-
-// EncryptWithDaemonIfOpen uses the RCW daemon (if one is available) to
-// encrypt and return data. If no RCW daemon is accessible, nil is returned.
-func EncryptWithDaemonIfOpen(decBytes []byte) []byte {
-	if IsOpen() {
-		return getEncFromDaemon(decBytes)
-	}
-	return nil
-}
-
-// getDecFromDaemon requests the RCW daemon to decrypt the given data.
+// GetDec requests the RCW daemon to decrypt the given data.
 // It returns the decrypted data.
-func getDecFromDaemon(encBytes []byte) []byte {
+func GetDec(encBytes []byte) []byte {
 	conn, client := connectToDaemon()
 	defer conn.Close()
 	defer client.Close()
@@ -39,9 +21,9 @@ func getDecFromDaemon(encBytes []byte) []byte {
 	return decBytes
 }
 
-// getEncFromDaemon requests the RCW daemon to encrypt the given data.
+// GetEnc requests the RCW daemon to encrypt the given data.
 // It returns the encrypted data.
-func getEncFromDaemon(decBytes []byte) []byte {
+func GetEnc(decBytes []byte) []byte {
 	conn, client := connectToDaemon()
 	defer conn.Close()
 	defer client.Close()
