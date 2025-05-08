@@ -81,7 +81,7 @@ func main() {
 		encBytes := wrappers.Encrypt([]byte(os.Args[2]), []byte(os.Args[3]))
 		os.WriteFile(outputFile, encBytes, 0600)
 	default:
-		fmt.Println("Usage: rcw [init <passwd>] | [enc <text> <passwd>] | [dec] | [<passwd>]")
+		fmt.Println("Usage: rcw [init <passwd>] | [enc <text> <passwd>] | dec | <passwd>")
 	}
 }
 
