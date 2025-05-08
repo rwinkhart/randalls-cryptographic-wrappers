@@ -19,7 +19,7 @@ func encryptAES(decBytes []byte, passphrase []byte) []byte {
 	io.ReadFull(rand.Reader, salt)
 
 	// derive key from passphrase using the salt
-	key := deriveKeyScrypt(passphrase, salt)
+	key := deriveKey(passphrase, salt)
 
 	// create AES-256 cipher
 	block, _ := aes.NewCipher(key)
@@ -55,7 +55,7 @@ func decryptAES(encBytes []byte, passphrase []byte) ([]byte, error) {
 	ciphertext := encBytes[saltSize+nonceSizeAES:]
 
 	// derive key from passphrase using the salt
-	key := deriveKeyScrypt(passphrase, salt)
+	key := deriveKey(passphrase, salt)
 
 	// create AES-256 cipher
 	block, _ := aes.NewCipher(key)

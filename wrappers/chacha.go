@@ -19,7 +19,7 @@ func encryptCha(data []byte, passphrase []byte) []byte {
 	io.ReadFull(rand.Reader, salt)
 
 	// derive key from passphrase using the salt
-	key := deriveKeyArgon2(passphrase, salt)
+	key := deriveKey(passphrase, salt)
 
 	// create ChaCha20-Poly1305 cipher
 	stream, _ := chacha20poly1305.NewX(key)
@@ -52,7 +52,7 @@ func decryptCha(encryptedData []byte, passphrase []byte) ([]byte, error) {
 	ciphertext := encryptedData[saltSize+nonceSizeCha:]
 
 	// derive key from passphrase using the salt
-	key := deriveKeyArgon2(passphrase, salt)
+	key := deriveKey(passphrase, salt)
 
 	// create ChaCha20-Poly1305 cipher
 	stream, _ := chacha20poly1305.NewX(key)
