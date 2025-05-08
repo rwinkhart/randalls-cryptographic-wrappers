@@ -4,18 +4,24 @@ import (
 	"crypto/sha256"
 	"io"
 	"os"
+
+	"github.com/rwinkhart/rcw/wrappers"
 )
 
 var daemonHash []byte
-var globalPassphrase string
+var globalPassphrase []byte
 
 // RCWService provides an RPC method.
 type RCWService struct{}
 
-// GetPass is the RPC method.
-// For now (as a test/example), it returns "hello" if the input is "hi".
-func (h *RCWService) GetPass(request string, reply *string) error {
-	*reply = globalPassphrase
+// DecryptRequest is the RPC method that decrypts the incoming data using
+// the global passphrase and returns the decrypted data
+func (h *RCWService) DecryptRequest(request []byte, reply *[]byte) error {
+	var err error
+	*reply, err = wrappers.Decrypt(request, globalPassphrase)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

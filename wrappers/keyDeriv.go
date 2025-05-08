@@ -9,7 +9,7 @@ import (
 const (
 	// parameters for Argon2
 	argonTime   = 8          // set to pass 1-second test in dev environment
-	argonMemory = 384 * 1024 // 384 MB
+	argonMemory = 384 * 1024 // 384 MB (target running comfortably on a Pi Zero/512 MB RAM)
 
 	// general constants
 	keyLen   = 32 // 256 bits, key length for both algorithms

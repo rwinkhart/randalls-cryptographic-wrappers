@@ -16,9 +16,10 @@ import (
 	peercred "github.com/rwinkhart/peercred-mini"
 )
 
-// Start should be called to serve the given passphrase through an RPC daemon.
-func Start(passphrase string) {
-	// store passphrase to be referenced by GetPass method
+// Start is the entry point for the RPC server responsible for
+// returning decrypted data to authenticated clients.
+func Start(passphrase []byte) {
+	// store passphrase to be referenced by DecryptRequest method
 	globalPassphrase = passphrase
 
 	// register RCWService with the RPC package
