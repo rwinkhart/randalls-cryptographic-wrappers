@@ -9,7 +9,7 @@ import (
 // DecryptWithDaemonIfOpen uses the RCW daemon (if one is available) to
 // decrypt and return data. If no RCW daemon is accessible, nil is returned.
 func DecryptWithDaemonIfOpen(encBytes []byte) []byte {
-	if daemonIsOpen() {
+	if IsOpen() {
 		return getDecFromDaemon(encBytes)
 	}
 	return nil
@@ -18,7 +18,7 @@ func DecryptWithDaemonIfOpen(encBytes []byte) []byte {
 // EncryptWithDaemonIfOpen uses the RCW daemon (if one is available) to
 // encrypt and return data. If no RCW daemon is accessible, nil is returned.
 func EncryptWithDaemonIfOpen(decBytes []byte) []byte {
-	if daemonIsOpen() {
+	if IsOpen() {
 		return getEncFromDaemon(decBytes)
 	}
 	return nil

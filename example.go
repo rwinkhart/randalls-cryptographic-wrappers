@@ -18,6 +18,23 @@ import (
 // rcw enc <text> : Encrypts the provided text and outputs the ciphertext to ex-cipher.rcw (attempts to use daemon, falls back to user input for passphrase)
 // rcw dec : Decrypts ex-cipher.rcw and outputs the plaintext to stdout (attempts to use daemon, falls back to user input for passphrase)
 
+// Implementation Notes:
+// There are two main ways to use the RCW library:
+//
+// 1. Daemon mode:
+// The daemon is started with a passphrase and runs in the background.
+// All encryption/decryption occurs in the daemon.
+// Avoid using the wrapper.Encrypt/Decrypt functions directly.
+// Instead, cache the passphrase with the daemon and use the daemon to encrypt/decrypt data.
+//
+// 2. Standalone mode:
+// The wrapper.Encrypt/Decrypt functions are used directly.
+// The passphrase is provided directly to the functions.
+//
+// It is up to the client to perform the sanity check before encrypting data.
+// This means that when using the daemon to cache the passphrase, the client should
+// perform the sanity check before activating the daemon.
+
 // TODO Tests:
 // Salt (aes+chacha)
 // Nonce (aes+chacha)
@@ -26,7 +43,6 @@ import (
 // RPC password sharing
 
 // TODO Enhancements:
-// Fix sanity check (should be performed when starting the daemon to ensure the correct passphrase is used)
 // Standalone cmd:
 //     Usable as symmetric-only GPG replacement
 
@@ -61,6 +77,15 @@ func main() {
 		}
 		// run decrypter daemon
 		// rcw <passwd>
+		if daemon.IsOpen() {
+			fmt.Println("Daemon already running")
+			return
+		}
+		err := wrappers.RunSanityCheck(sanityFile, []byte(os.Args[1]))
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 		daemon.Start([]byte(os.Args[1]))
 	case 3:
 		if os.Args[1] == "init" {
