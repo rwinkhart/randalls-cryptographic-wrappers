@@ -83,13 +83,13 @@ func Start(passphrase string) {
 		timer.Reset(3 * time.Minute)
 
 		// use a goroutine to check the client's identity
-		go handleConn(conn)
+		go handleConn(conn, sigChan)
 	}
 }
 
 // handleConn verifies the identity of the client.
 // It gets the PID of the client process and verifies it's running the same binary
-func handleConn(conn net.Conn) {
+func handleConn(conn net.Conn, sigChan chan os.Signal) {
 	ucred := peercred.Get(conn)
 
 	// get server SID (UID)
@@ -107,6 +107,7 @@ func handleConn(conn net.Conn) {
 		// log the client's path, and kill the daemon
 		conn.Close()
 		log.Printf("Request received from invalid client: PID(%d), UID(%s), Path(%s)", ucred.PID, ucred.UID, callingBinPath) // TODO log to file
+		sigChan <- syscall.SIGTERM
 		os.Exit(2)
 	}
 }

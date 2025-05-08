@@ -61,7 +61,7 @@ func Start(passphrase string) {
 			continue
 		}
 		// use a goroutine to check the client's identity
-		go handleConn(conn)
+		go handleConn(conn, sigChan)
 	}
 }
 
@@ -71,7 +71,7 @@ func Start(passphrase string) {
 // The passphrase is only returned if the client's executable hash matches the daemon's hash
 // and if the request is coming from the same user.
 // This ensures that only the binary the daemon is embedded in can retrieve the passphrase.
-func handleConn(conn net.Conn) {
+func handleConn(conn net.Conn, sigChan chan os.Signal) {
 	ucred := peercred.Get(conn)
 
 	// check if the RPC call is coming from an identical binary and from the same user
@@ -84,6 +84,6 @@ func handleConn(conn net.Conn) {
 		// log the client's path, and kill the daemon
 		conn.Close()
 		log.Printf("Request received from invalid client: PID(%d), UID(%s), Path(%s)", ucred.PID, ucred.UID, callingBinPath) // TODO log to file
-		os.Exit(2)
+		sigChan <- syscall.SIGTERM
 	}
 }
