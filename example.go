@@ -27,7 +27,8 @@ import (
 
 // TODO Enhancements:
 // Security:
-// 	   Play with nonce sizes and Argon2 parameters to find the best speed-security balance
+// 	   Handle decryption in the daemon and return decrypted data, rather than returning the passphrase
+// 	   Play with nonce sizes and KDF parameters to find the best speed-security balance
 // Standalone cmd:
 //     Usable as symmetric-only GPG replacement
 
