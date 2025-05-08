@@ -21,7 +21,7 @@ func RunSanityCheck(path string, passphrase []byte) error {
 	if err != nil {
 		return errors.New("Failed to read sanity check file (" + path + ")")
 	}
-	decBytes, err := Decrypt(encBytes, passphrase)
+	decBytes, _ := Decrypt(encBytes, passphrase)
 	if string(decBytes) == "thx4usin'rcw" {
 		return nil
 	}
