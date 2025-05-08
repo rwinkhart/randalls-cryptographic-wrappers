@@ -2,34 +2,63 @@ package daemon
 
 import (
 	"log"
+	"net"
 	"net/rpc"
 )
 
-// CallDaemonIfOpen uses the RCW daemon (if one is available) to
+// DecryptWithDaemonIfOpen uses the RCW daemon (if one is available) to
 // decrypt and return data. If no RCW daemon is accessible, nil is returned.
-func CallDaemonIfOpen(encBytes []byte) []byte {
+func DecryptWithDaemonIfOpen(encBytes []byte) []byte {
 	if daemonIsOpen() {
-		return call(encBytes)
+		return getDecFromDaemon(encBytes)
 	}
 	return nil
 }
 
-// call connects to the RPC server and requests the passphrase.
-func call(encBytes []byte) []byte {
-	// connect to the UNIX domain socket/Windows named pipe
-	conn := getConn()
-	defer conn.Close()
+// EncryptWithDaemonIfOpen uses the RCW daemon (if one is available) to
+// encrypt and return data. If no RCW daemon is accessible, nil is returned.
+func EncryptWithDaemonIfOpen(decBytes []byte) []byte {
+	if daemonIsOpen() {
+		return getEncFromDaemon(decBytes)
+	}
+	return nil
+}
 
-	// create an RPC client using the connection
-	client := rpc.NewClient(conn)
+// getDecFromDaemon requests the RCW daemon to decrypt the given data.
+// It returns the decrypted data.
+func getDecFromDaemon(encBytes []byte) []byte {
+	conn, client := connectToDaemon()
+	defer conn.Close()
 	defer client.Close()
 
-	// request the passphrase from the RPC server
-	var reply []byte
-	if err := client.Call("RCWService.DecryptRequest", encBytes, &reply); err != nil {
+	// request decBytes from the RPC server
+	var decBytes []byte
+	if err := client.Call("RCWService.DecryptRequest", encBytes, &decBytes); err != nil {
 		log.Fatalf("Error calling RCWService.DecryptRequest: %v", err)
 	}
+	return decBytes
+}
 
-	// return the passphrase
-	return []byte(reply)
+// getEncFromDaemon requests the RCW daemon to encrypt the given data.
+// It returns the encrypted data.
+func getEncFromDaemon(decBytes []byte) []byte {
+	conn, client := connectToDaemon()
+	defer conn.Close()
+	defer client.Close()
+
+	// request encBytes from the RPC server
+	var encBytes []byte
+	if err := client.Call("RCWService.EncryptRequest", decBytes, &encBytes); err != nil {
+		log.Fatalf("Error calling RCWService.EncryptRequest: %v", err)
+	}
+	return encBytes
+}
+
+// connectToDaemon establishes a connection to the RCW daemon.
+// It returns the connection and the RPC client.
+// The caller is responsible for closing the connection and client.
+func connectToDaemon() (net.Conn, *rpc.Client) {
+	conn := getConn()
+	client := rpc.NewClient(conn)
+	return conn, client
 }

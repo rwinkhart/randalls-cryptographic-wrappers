@@ -1,14 +1,14 @@
 module github.com/rwinkhart/rcw
 
-go 1.24.2
+go 1.24.3
 
 require github.com/rwinkhart/peercred-mini v0.0.0-20250407033241-c09add2eceea
 
 require (
 	github.com/Microsoft/go-winio v0.6.2
-	golang.org/x/crypto v0.37.0
-	golang.org/x/sys v0.32.0
-	golang.org/x/term v0.31.0
+	golang.org/x/crypto v0.38.0
+	golang.org/x/sys v0.33.0
+	golang.org/x/term v0.32.0
 )
 
 replace golang.org/x/sys => github.com/rwinkhart/sys-freebsd-13-xucred v0.32.0

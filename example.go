@@ -15,7 +15,7 @@ import (
 // Usage:
 // rcw init <passwd> : Generates the required sanity check file
 // rcw <passphrase> : Runs the rcw daemon to decrypt data for three minutes
-// rcw enc <text> <passwd> : Encrypts the provided text and outputs the ciphertext to encrypted-example.txt
+// rcw enc <text> : Encrypts the provided text and outputs the ciphertext to ex-cipher.rcw (attempts to use daemon, falls back to user input for passphrase)
 // rcw dec : Decrypts ex-cipher.rcw and outputs the plaintext to stdout (attempts to use daemon, falls back to user input for passphrase)
 
 // TODO Tests:
@@ -26,6 +26,7 @@ import (
 // RPC password sharing
 
 // TODO Enhancements:
+// Fix sanity check (should be performed when starting the daemon to ensure the correct passphrase is used)
 // Standalone cmd:
 //     Usable as symmetric-only GPG replacement
 
@@ -45,7 +46,7 @@ func main() {
 				fmt.Println(err)
 				return
 			}
-			decBytes := daemon.CallDaemonIfOpen(encBytes)
+			decBytes := daemon.DecryptWithDaemonIfOpen(encBytes)
 			if decBytes == nil {
 				fmt.Println("No RCW daemon available")
 				passphrase := inputHidden("Enter RCW passphrase:")
@@ -69,19 +70,23 @@ func main() {
 			if err != nil {
 				fmt.Println(err)
 			}
-		}
-	case 4:
-		// encrypt data (from cli args)
-		// rcw enc <text> <passwd>
-		err := wrappers.RunSanityCheck(sanityFile, []byte(os.Args[3]))
-		if err != nil {
-			fmt.Println(err)
+			return
+		} else if os.Args[1] == "enc" {
+			// encrypt data (using daemon if available)
+			// rcw enc <data>
+			decBytes := []byte(os.Args[2])
+			encBytes := daemon.EncryptWithDaemonIfOpen(decBytes)
+			if encBytes == nil {
+				fmt.Println("No RCW daemon available")
+				passphrase := inputHidden("Enter RCW passphrase:")
+				encBytes = wrappers.Encrypt(decBytes, passphrase)
+			}
+			os.WriteFile(outputFile, encBytes, 0600)
 			return
 		}
-		encBytes := wrappers.Encrypt([]byte(os.Args[2]), []byte(os.Args[3]))
-		os.WriteFile(outputFile, encBytes, 0600)
+		fallthrough
 	default:
-		fmt.Println("Usage: rcw [init <passwd>] | [enc <text> <passwd>] | dec | <passwd>")
+		fmt.Println("Usage: rcw [init <passwd>] | [enc <text>] | dec | <passwd>")
 	}
 }
 

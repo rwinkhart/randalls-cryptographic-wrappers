@@ -16,12 +16,19 @@ type RCWService struct{}
 
 // DecryptRequest is the RPC method that decrypts the incoming data using
 // the global passphrase and returns the decrypted data
-func (h *RCWService) DecryptRequest(request []byte, reply *[]byte) error {
+func (h *RCWService) DecryptRequest(encBytes []byte, reply *[]byte) error {
 	var err error
-	*reply, err = wrappers.Decrypt(request, globalPassphrase)
+	*reply, err = wrappers.Decrypt(encBytes, globalPassphrase)
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+// EncryptRequest is the RPC method that encrypts the incoming data using
+// the global passphrase and returns the encrypted data
+func (h *RCWService) EncryptRequest(decBytes []byte, reply *[]byte) error {
+	*reply = wrappers.Encrypt(decBytes, globalPassphrase)
 	return nil
 }
 
