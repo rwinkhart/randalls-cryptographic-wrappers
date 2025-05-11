@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/rwinkhart/go-boilerplate/front"
 	"github.com/rwinkhart/rcw/daemon"
 	"github.com/rwinkhart/rcw/wrappers"
-	"golang.org/x/term"
 )
 
 // This sample program serves purley as a way to interactively test the features
@@ -66,7 +66,7 @@ func main() {
 			if daemon.IsOpen() {
 				decBytes = daemon.GetDec(encBytes)
 			} else {
-				decBytes, err = wrappers.Decrypt(encBytes, inputHidden("Enter RCW passphrase:"))
+				decBytes, err = wrappers.Decrypt(encBytes, front.InputHidden("Enter RCW passphrase:"))
 				if err != nil {
 					fmt.Println(err)
 					return
@@ -104,7 +104,13 @@ func main() {
 			if daemon.IsOpen() {
 				encBytes = daemon.GetEnc(decBytes)
 			} else {
-				encBytes = wrappers.Encrypt(decBytes, inputHidden("Enter RCW passphrase:"))
+				passphrase := front.InputHidden("Enter RCW passphrase: ")
+				err := wrappers.RunSanityCheck(sanityFile, passphrase)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				encBytes = wrappers.Encrypt(decBytes, passphrase)
 			}
 			os.WriteFile(outputFile, encBytes, 0600)
 			return
@@ -113,12 +119,4 @@ func main() {
 	default:
 		fmt.Println("Usage: rcw [init <passwd>] | [enc <text>] | dec | <passwd>")
 	}
-}
-
-// inputHidden prompts the user for input and returns the input as a byte array, hiding the input from the terminal.
-func inputHidden(prompt string) []byte {
-	fmt.Print("\n" + prompt + " ")
-	byteInput, _ := term.ReadPassword(int(os.Stdin.Fd()))
-	fmt.Println()
-	return byteInput
 }
