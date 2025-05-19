@@ -3,40 +3,32 @@ package wrappers
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/rand"
 	"errors"
-	"io"
 )
 
 const (
 	nonceSizeAES = 12 // GCM standard nonce size is 12 bytes
+	hkdfInfoAES  = "AES256-GCM"
+	hkdfInfoCha  = "ChaCha20-Poly1305"
 )
 
 // EncryptAES encrypts data using AES-256-GCM.
-func encryptAES(decBytes []byte, passphrase []byte) []byte {
-	// generate a random salt
-	salt := make([]byte, saltSize)
-	io.ReadFull(rand.Reader, salt)
-
-	// derive key from passphrase using the salt
-	key := deriveKey(passphrase, salt)
-
+func encryptAES(decBytes, key2, salt2 []byte) []byte {
 	// create AES-256 cipher
-	block, _ := aes.NewCipher(key)
+	block, _ := aes.NewCipher(key2)
 
 	// create GCM mode
 	aesGCM, _ := cipher.NewGCM(block)
 
 	// generate a random nonce
-	nonce := make([]byte, nonceSizeAES)
-	io.ReadFull(rand.Reader, nonce)
+	nonce := getRandomBytes(nonceSizeAES)
 
 	// encrypt the data
 	ciphertext := aesGCM.Seal(nil, nonce, decBytes, nil)
 
-	// format: salt + nonce + ciphertext
-	result := make([]byte, 0, saltSize+nonceSizeAES+len(ciphertext))
-	result = append(result, salt...)
+	// format: salt2 + nonce + ciphertext
+	result := make([]byte, 0, saltSize2+nonceSizeAES+len(ciphertext))
+	result = append(result, salt2...)
 	result = append(result, nonce...)
 	result = append(result, ciphertext...)
 
@@ -44,21 +36,21 @@ func encryptAES(decBytes []byte, passphrase []byte) []byte {
 }
 
 // DecryptAES decrypts data using AES256-GCM.
-func decryptAES(encBytes []byte, passphrase []byte) ([]byte, error) {
-	if len(encBytes) < saltSize+nonceSizeAES {
+func decryptAES(encBytes, key1 []byte) ([]byte, error) {
+	if len(encBytes) < saltSize2+nonceSizeAES {
 		return nil, errors.New("AES256-GCM: Encrypted data is too short")
 	}
 
 	// extract salt, nonce, and ciphertext
-	salt := encBytes[:saltSize]
-	nonce := encBytes[saltSize : saltSize+nonceSizeAES]
-	ciphertext := encBytes[saltSize+nonceSizeAES:]
+	salt2 := encBytes[:saltSize2]
+	nonce := encBytes[saltSize2 : saltSize2+nonceSizeAES]
+	ciphertext := encBytes[saltSize2+nonceSizeAES:]
 
-	// derive key from passphrase using the salt
-	key := deriveKey(passphrase, salt)
+	// derive secondary key from primary key using the salt
+	key2 := deriveSecondaryKey(key1, salt2, []byte(hkdfInfoAES))
 
 	// create AES-256 cipher
-	block, _ := aes.NewCipher(key)
+	block, _ := aes.NewCipher(key2)
 
 	// create GCM mode
 	aesGCM, _ := cipher.NewGCM(block)

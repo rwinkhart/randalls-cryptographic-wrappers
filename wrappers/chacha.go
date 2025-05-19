@@ -1,9 +1,7 @@
 package wrappers
 
 import (
-	"crypto/rand"
 	"errors"
-	"io"
 
 	"golang.org/x/crypto/chacha20poly1305"
 )
@@ -13,27 +11,19 @@ const (
 )
 
 // EncryptCha encrypts data using ChaCha20-Poly1305.
-func encryptCha(data []byte, passphrase []byte) []byte {
-	// generate a random salt
-	salt := make([]byte, saltSize)
-	io.ReadFull(rand.Reader, salt)
-
-	// derive key from passphrase using the salt
-	key := deriveKey(passphrase, salt)
-
+func encryptCha(decBytes, key2, salt2 []byte) []byte {
 	// create ChaCha20-Poly1305 cipher
-	stream, _ := chacha20poly1305.NewX(key)
+	stream, _ := chacha20poly1305.NewX(key2)
 
 	// generate a random nonce
-	nonce := make([]byte, nonceSizeCha)
-	io.ReadFull(rand.Reader, nonce)
+	nonce := getRandomBytes(nonceSizeCha)
 
 	// encrypt the data
-	ciphertext := stream.Seal(nil, nonce, data, nil)
+	ciphertext := stream.Seal(nil, nonce, decBytes, nil)
 
-	// format: salt + nonce + ciphertext
-	result := make([]byte, 0, saltSize+nonceSizeCha+len(ciphertext))
-	result = append(result, salt...)
+	// format: salt2 + nonce + ciphertext
+	result := make([]byte, 0, saltSize2+nonceSizeCha+len(ciphertext))
+	result = append(result, salt2...)
 	result = append(result, nonce...)
 	result = append(result, ciphertext...)
 
@@ -41,21 +31,21 @@ func encryptCha(data []byte, passphrase []byte) []byte {
 }
 
 // DecryptCha decrypts data using ChaCha20-Poly1305.
-func decryptCha(encryptedData []byte, passphrase []byte) ([]byte, error) {
-	if len(encryptedData) < saltSize+nonceSizeCha {
+func decryptCha(encBytes, key1 []byte) ([]byte, error) {
+	if len(encBytes) < saltSize2+nonceSizeCha {
 		return nil, errors.New("ChaCha20-Poly1305: Encrypted data is too short")
 	}
 
 	// extract salt, nonce, and ciphertext
-	salt := encryptedData[:saltSize]
-	nonce := encryptedData[saltSize : saltSize+nonceSizeCha]
-	ciphertext := encryptedData[saltSize+nonceSizeCha:]
+	salt2 := encBytes[:saltSize2]
+	nonce := encBytes[saltSize2 : saltSize2+nonceSizeCha]
+	ciphertext := encBytes[saltSize2+nonceSizeCha:]
 
-	// derive key from passphrase using the salt
-	key := deriveKey(passphrase, salt)
+	// derive secondary key from primary key using the salt
+	key2 := deriveSecondaryKey(key1, salt2, []byte(hkdfInfoCha))
 
 	// create ChaCha20-Poly1305 cipher
-	stream, _ := chacha20poly1305.NewX(key)
+	stream, _ := chacha20poly1305.NewX(key2)
 
 	// decrypt the data
 	plaintext, err := stream.Open(nil, nonce, ciphertext, nil)
