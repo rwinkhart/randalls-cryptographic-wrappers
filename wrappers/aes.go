@@ -27,12 +27,7 @@ func encryptAES(decBytes, key2, salt2 []byte) []byte {
 	ciphertext := aesGCM.Seal(nil, nonce, decBytes, nil)
 
 	// format: salt2 + nonce + ciphertext
-	result := make([]byte, 0, saltSize2+nonceSizeAES+len(ciphertext))
-	result = append(result, salt2...)
-	result = append(result, nonce...)
-	result = append(result, ciphertext...)
-
-	return result
+	return append(append(append(make([]byte, 0, saltSize2+nonceSizeAES+len(ciphertext)), salt2...), nonce...), ciphertext...)
 }
 
 // DecryptAES decrypts data using AES256-GCM.

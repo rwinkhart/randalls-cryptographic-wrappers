@@ -28,8 +28,5 @@ func Encrypt(decBytes []byte, passphrase []byte) []byte {
 	decBytes = encryptAES(decBytes, key2AES, salt2AES)
 	decBytes = encryptCha(decBytes, key2Cha, salt2Cha)
 	// format: salt1 + decBytes per algorithm (salt2* + nonce + ciphertext)
-	encBytes := make([]byte, 0, saltSize1+len(decBytes))
-	encBytes = append(encBytes, salt1...)
-	encBytes = append(encBytes, decBytes...)
-	return encBytes
+	return append(append(make([]byte, 0, saltSize1+len(decBytes)), salt1...), decBytes...)
 }

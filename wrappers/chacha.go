@@ -22,12 +22,7 @@ func encryptCha(decBytes, key2, salt2 []byte) []byte {
 	ciphertext := stream.Seal(nil, nonce, decBytes, nil)
 
 	// format: salt2 + nonce + ciphertext
-	result := make([]byte, 0, saltSize2+nonceSizeCha+len(ciphertext))
-	result = append(result, salt2...)
-	result = append(result, nonce...)
-	result = append(result, ciphertext...)
-
-	return result
+	return append(append(append(make([]byte, 0, saltSize2+nonceSizeCha+len(ciphertext)), salt2...), nonce...), ciphertext...)
 }
 
 // DecryptCha decrypts data using ChaCha20-Poly1305.
