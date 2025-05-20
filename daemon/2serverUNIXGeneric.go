@@ -47,14 +47,14 @@ func Start(passphrase []byte) {
 		os.Exit(0)
 	}()
 
-	// accept connections (timeout after 3 minutes of inactivity)
+	// accept connections until Timeout takes effect
 	for {
-		listener.(*net.UnixListener).SetDeadline(time.Now().Add(3 * time.Minute))
+		listener.(*net.UnixListener).SetDeadline(time.Now().Add(time.Duration(Timeout) * time.Second))
 
 		conn, err := listener.Accept()
 		if err != nil {
 			if err.(net.Error).Timeout() {
-				log.Println("Three minutes have passed without any connections. Exiting...")
+				log.Println(strconv.Itoa(Timeout) + " seconds have passed without any connections. Exiting...")
 				listener.Close()
 				os.Exit(0)
 			}

@@ -8,6 +8,8 @@ import (
 	"github.com/rwinkhart/rcw/wrappers"
 )
 
+var Timeout = 300 // seconds for RPC server timeout; configurable
+
 var daemonHash []byte
 var globalPassphrase []byte
 

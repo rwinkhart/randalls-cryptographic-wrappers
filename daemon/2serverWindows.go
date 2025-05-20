@@ -9,6 +9,7 @@ import (
 	"net/rpc"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -54,13 +55,13 @@ func Start(passphrase []byte) {
 	// capture sigterms to ensure listener is closed
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-	// create 3-minute inactivity timer
-	timer := time.NewTimer(3 * time.Minute)
+	// create inactivity timer
+	timer := time.NewTimer(time.Duration(Timeout) * time.Second)
 	killTimer := make(chan struct{})
 	go func() {
 		select {
 		case <-timer.C:
-			log.Println("Three minutes have passed without any connections. Exiting...")
+			log.Println(strconv.Itoa(Timeout) + " seconds have passed without any connections. Exiting...")
 			listener.Close()
 			os.Exit(0)
 		case <-killTimer:
