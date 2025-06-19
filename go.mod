@@ -1,13 +1,12 @@
 module github.com/rwinkhart/rcw
 
-go 1.24.3
-
-require github.com/rwinkhart/peercred-mini v0.1.0
+go 1.24.4
 
 require (
 	github.com/Microsoft/go-winio v0.6.2
-	github.com/rwinkhart/go-boilerplate v0.0.0-20250509173525-20670ec7bb9c
-	golang.org/x/crypto v0.38.0
+	github.com/rwinkhart/go-boilerplate v0.1.0
+	github.com/rwinkhart/peercred-mini v0.1.0
+	golang.org/x/crypto v0.39.0
 	golang.org/x/sys v0.33.0
 )
 
